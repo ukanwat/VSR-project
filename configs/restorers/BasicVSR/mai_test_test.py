@@ -1,4 +1,4 @@
-dataroot = "/mnt/tmp/REDS/test/test_sharp_bicubic"
+dataroot = "/content/drive/MyDrive/Datasets/REDS/test/test_sharp_bicubic"
 load_path = './ckpt/epoch_62'
 exp_name = 'mai_test_for_test'
 eval_part = None

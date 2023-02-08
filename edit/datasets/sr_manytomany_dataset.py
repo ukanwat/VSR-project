@@ -39,7 +39,7 @@ class SRManyToManyDataset(BaseVSRDataset):
     def load_annotations(self):
         # get keys
         keys = list(scandir(self.lq_folder, suffix=IMG_EXTENSIONS, recursive=True))
-        keys = [ v for v in keys if len(v.split('/')) == 2]
+        keys = [ v for v in keys if (len(v.split('/')) == 2 and v!='015/00000071 (1).png')]
         keys = sorted(keys, key=get_key_for_video_imgs)  # 000/00000002.png for reds
         
         # do split for train and eval
