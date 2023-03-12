@@ -14,18 +14,21 @@ model = dict(
         type='BasicVSR_v5',
         in_channels=3,
         out_channels=3,
-        hidden_channels = 8,
-        upscale_factor = scale),
-    pixel_loss=dict(type='L2Loss')) # L2Loss CharbonnierLoss
+        hidden_channels=8,
+        upscale_factor=scale),
+    pixel_loss=dict(type='L2Loss'))  # L2Loss CharbonnierLoss
 
 # model training and testing settings
 train_cfg = None
-eval_cfg = dict(metrics=['PSNR'], crop_border=0, multi_pad = 1, gap = 1, save_shift = 0) # save_shift is for validation (NTIRE2021), when test ,set to zero
+# save_shift is for validation (NTIRE2021), when test ,set to zero
+eval_cfg = dict(metrics=['PSNR'], crop_border=0,
+                multi_pad=1, gap=1, save_shift=0)
 img_norm_cfg = dict(mean=[0, 0, 0], std=[1, 1, 1])
 
 test_dataset_type = 'SRManyToManyDataset'
 test_pipeline = [
-    dict(type='GenerateFrameIndiceswithPadding', padding="reflection", many2many = False, index_start = 0, name_padding = True),
+    dict(type='GenerateFrameIndiceswithPadding', padding="reflection",
+         many2many=False, index_start=0, name_padding=True),
     dict(
         type='LoadImageFromFileList',
         io_backend='disk',
@@ -44,12 +47,12 @@ data = dict(
     test_workers_per_gpu=5,
     test=dict(
         type=test_dataset_type,
-        lq_folder= dataroot + "/X4",
+        lq_folder=dataroot + "/X4",
         num_input_frames=1,
         pipeline=test_pipeline,
         scale=scale,
         mode="test",
-        eval_part = eval_part)
+        eval_part=eval_part)
 )
 
 optimizers = dict(generator=dict(type='Adam', lr=0.00001))
@@ -64,7 +67,8 @@ log_config = dict(
         dict(type='TextLoggerHook', average_length=100),
         # dict(type='VisualDLLoggerHook')
     ])
-evaluation = dict(interval=1, save_image=False, multi_process=False, ensemble=False)
+evaluation = dict(interval=1, save_image=False,
+                  multi_process=False, ensemble=False)
 
 # runtime settings
 work_dir = f'./workdirs/{exp_name}'
