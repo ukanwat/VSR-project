@@ -43,14 +43,12 @@ def gauss_filter(sigma, epsilon=1e-2):
         sigma * np.sqrt(-2 * np.log(np.sqrt(2 * np.pi) * sigma * epsilon)))
     size = np.int(2 * half_size + 1)
 
-    # create filter in x axis
     filter_x = np.zeros((size, size))
     for i in range(size):
         for j in range(size):
             filter_x[i, j] = gaussian(i - half_size, sigma) * dgaussian(
                 j - half_size, sigma)
 
-    # normalize filter
     norm = np.sqrt((filter_x**2).sum())
     filter_x = filter_x / norm
     filter_y = np.transpose(filter_x)
@@ -61,7 +59,7 @@ def gauss_filter(sigma, epsilon=1e-2):
 def gauss_gradient(img, sigma):
     """Gaussian gradient.
 
-    From https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/8060/versions/2/previews/gaussgradient/gaussgradient.m/index.html  # noqa
+    From https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/8060/versions/2/previews/gaussgradient/gaussgradient.m/index.html  
 
     Args:
         img (ndarray): Input image.

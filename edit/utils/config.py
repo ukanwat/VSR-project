@@ -105,7 +105,7 @@ class Config:
         config_file = open(filename).read()
         for key, value in support_templates.items():
             regexp = r'\{\{\s*' + str(key) + r'\s*\}\}'
-            value = value.replace("\\", "/")  # for windows
+            value = value.replace("\\", "/")
             config_file = re.sub(regexp, value, config_file)
         with open(temp_config_name, 'w') as tmp_config_file:
             tmp_config_file.write(config_file)
@@ -119,13 +119,15 @@ class Config:
             raise IOError('Only py type are supported now!')
 
         with tempfile.TemporaryDirectory() as temp_config_dir:
-            temp_config_file = tempfile.NamedTemporaryFile(dir=temp_config_dir, suffix=fileExtname)
+            temp_config_file = tempfile.NamedTemporaryFile(
+                dir=temp_config_dir, suffix=fileExtname)
             if platform.system() == 'Windows':
                 temp_config_file.close()
             temp_config_name = osp.basename(temp_config_file.name)
-            # Substitute predefined variables
+
             if use_predefined_variables:
-                Config._substitute_predefined_vars(filename, temp_config_file.name)
+                Config._substitute_predefined_vars(
+                    filename, temp_config_file.name)
             else:
                 shutil.copyfile(filename, temp_config_file.name)
 
@@ -140,12 +142,11 @@ class Config:
                     for name, value in mod.__dict__.items()
                     if not name.startswith('__')
                 }
-                # delete imported module
+
                 del sys.modules[temp_module_name]
             else:
                 raise NotImplementedError("")
 
-            # close temp file
             temp_config_file.close()
 
         cfg_text = filename + '\n'
@@ -174,7 +175,6 @@ class Config:
             base_cfg_dict = Config._merge_a_into_b(cfg_dict, base_cfg_dict)
             cfg_dict = base_cfg_dict
 
-            # merge cfg_text
             cfg_text_list.append(cfg_text)
             cfg_text = '\n'.join(cfg_text_list)
 
@@ -182,9 +182,7 @@ class Config:
 
     @staticmethod
     def _merge_a_into_b(a, b):
-        # merge dict `a` into dict `b` (non-inplace). values in `a` will
-        # overwrite `b`.
-        # copy first to avoid inplace modification
+
         b = b.copy()
         for k, v in a.items():
             if isinstance(v, dict) and k in b and not v.pop(DELETE_KEY, False):
@@ -277,7 +275,7 @@ class Config:
             return attr_str
 
         def _format_list(k, v, use_mapping=False):
-            # check if all items in the list are dict
+
             if all(isinstance(_, dict) for _ in v):
                 v_str = '[\n'
                 v_str += '\n'.join(
@@ -331,7 +329,7 @@ class Config:
 
         cfg_dict = self._cfg_dict.to_dict()
         text = _format_dict(cfg_dict, outest_level=True)
-        # copied from setup.cfg
+
         yapf_style = dict(
             based_on_style='pep8',
             blank_line_before_nested_class_or_def=True,

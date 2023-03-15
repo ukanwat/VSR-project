@@ -20,8 +20,8 @@ class Registry:
 
     def __repr__(self):
         format_str = self.__class__.__name__ + \
-                     f'(name={self._name}, ' \
-                     f'items={self._module_dict})'
+            f'(name={self._name}, ' \
+            f'items={self._module_dict})'
         return format_str
 
     @property
@@ -88,18 +88,17 @@ class Registry:
         if not isinstance(force, bool):
             raise TypeError(f'force must be a boolean, but got {type(force)}')
 
-        # raise the error ahead of time
         if not (name is None or isinstance(name, str)):
             raise TypeError(f'name must be a str, but got {type(name)}')
 
-        # use it as a normal method: x.register_module(module=SomeClass)
         if module is not None:
-            self._register_module(module_class=module, module_name=name, force=force)
+            self._register_module(module_class=module,
+                                  module_name=name, force=force)
             return module
 
-        # use it as a decorator: @x.register_module()
         def _register(cls):
-            self._register_module(module_class=cls, module_name=name, force=force)
+            self._register_module(
+                module_class=cls, module_name=name, force=force)
             return cls
 
         return _register
@@ -119,7 +118,8 @@ def build_from_cfg(cfg, registry, default_args=None):
     if not isinstance(cfg, dict):
         raise TypeError(f'cfg must be a dict, but got {type(cfg)}')
     if 'type' not in cfg:
-        raise KeyError(f'the cfg dict must contain the key "type", but got {cfg}')
+        raise KeyError(
+            f'the cfg dict must contain the key "type", but got {cfg}')
     if not isinstance(registry, Registry):
         raise TypeError('registry must be an edit.utils.Registry object, '
                         f'but got {type(registry)}')
@@ -132,11 +132,13 @@ def build_from_cfg(cfg, registry, default_args=None):
     if isinstance(obj_type, str):
         obj_cls = registry.get(obj_type)
         if obj_cls is None:
-            raise KeyError(f'{obj_type} is not in the {registry.name} registry')
+            raise KeyError(
+                f'{obj_type} is not in the {registry.name} registry')
     elif inspect.isclass(obj_type):
         obj_cls = obj_type
     else:
-        raise TypeError(f'type must be a str or valid type, but got {type(obj_type)}')
+        raise TypeError(
+            f'type must be a str or valid type, but got {type(obj_type)}')
 
     if default_args is not None:
         for name, value in default_args.items():

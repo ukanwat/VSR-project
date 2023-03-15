@@ -8,9 +8,10 @@ class AVERAGE_POOL(ABC):
             key : float/int
             key : list of float/int
     """
+
     def __init__(self, average_length=10):
         assert average_length >= 1 and isinstance(average_length, int)
-        assert average_length <= 1000 , 'average length should not too large'
+        assert average_length <= 1000, 'average length should not too large'
         self.average_length = average_length
         self.pool = defaultdict(list)
 
@@ -18,7 +19,7 @@ class AVERAGE_POOL(ABC):
         """
             return  average  list  or  float
         """
-        if self.pool[(key, 0)] != []: # need to return list
+        if self.pool[(key, 0)] != []:
             res = []
             for idx in range(100):
                 List = self.pool[(key, idx)]
@@ -29,11 +30,11 @@ class AVERAGE_POOL(ABC):
         else:
             List = self.pool[key]
             return sum(List) / len(List)
-            
+
     def _maintain(self, List, val):
         List.append(val)
         if len(List) > self.average_length:
-            List.pop(0) # remove the first one
+            List.pop(0)
 
     def update(self, key, value):
         if isinstance(value, list):

@@ -3,112 +3,109 @@ import random
 import cv2
 from megengine import Tensor
 
+
 def img_shelter(img, black_ratio):
     H, W, _ = img.shape
     S = H * (W / 3) / 2
     values = [1, 2, 3, 4]
-    a = np.random.choice(values)     # 随机选择顶点
-    x = np.random.randint(W / 3, W)  # 随机选择一个边长
+    a = np.random.choice(values)
+    x = np.random.randint(W / 3, W)
     y = 2 * S / x
 
-    scale = random.uniform(0.2, 1)   # 随机选择一个系数
+    scale = random.uniform(0.2, 1)
     x = x * scale
     y = y * scale
-    
-    if a == 1:  # 左上角
-        # print('左上角')
+
+    if a == 1:
+
         p_A = [0, 0]
         p_B = [x, 0]
         p_C = [0, y]
-    elif a == 2:  # 右上角
-        # print('右上角')
-        p_A = [W, 0]  # 右上角点
+    elif a == 2:
+
+        p_A = [W, 0]
         p_B = [W - x, 0]
         p_C = [W, y]
-    elif a == 3:  # 左下角
-        # print('左下角')
+    elif a == 3:
+
         p_A = [0, H]
         p_B = [0, H - y]
         p_C = [x, H]
-    elif a == 4:  # 右下角
-        # print('右下角')
+    elif a == 4:
+
         p_A = [W, H]
         p_B = [W - x, H]
         p_C = [W, H - y]
 
-    # img = cv2.imread('C:\\Users\\76397\\Desktop\\stage1\\optical\\1_1.tif', 0)
-    # print(img.shape)
-    b = np.array([[p_A, p_B, p_C]], dtype=np.int32)  # 左上角点 三个点位置可以随意
+    b = np.array([[p_A, p_B, p_C]], dtype=np.int32)
 
     if np.random.random() < black_ratio:
-        c = (0, 0, 0) #黑色
+        c = (0, 0, 0)
     else:
-        c = (255, 255, 255) #白色
+        c = (255, 255, 255)
 
-    cv2.fillPoly(img, b, c) #c是颜色
-    # plt.axis('off')
-    # plt.imshow(img, cmap='gray')
-    # plt.show()
+    cv2.fillPoly(img, b, c)
+
     return img
 
 
-def bbox_ensemble_back(bbox, Type = 0, Len = 800):
+def bbox_ensemble_back(bbox, Type=0, Len=800):
     assert len(bbox.shape) == 2 and bbox.shape[-1] == 4
     bbox_numpy2 = bbox.numpy()
     bbox_numpy = bbox_numpy2.copy()
     bbox_ans = np.zeros_like(bbox_numpy)
-    # only change the front 2 now (for hjj)
+
     if Type == 0:
         return bbox.numpy()
     elif Type == 1:
-        bbox_ans = bbox_numpy[:,2] - bbox_numpy[:,0]
+        bbox_ans = bbox_numpy[:, 2] - bbox_numpy[:, 0]
         bbox_numpy[:, 2] = Len-1-bbox_numpy[:, 0]
         bbox_numpy[:, 0] = bbox_numpy[:, 2] - bbox_ans
-        # 转置
+
         bbox_ans = np.zeros_like(bbox_numpy)
         bbox_ans[:, 0] = bbox_numpy[:, 1]
         bbox_ans[:, 1] = bbox_numpy[:, 0]
         return bbox_ans
     elif Type == 2:
-        # 左右
-        bbox_ans = (bbox_numpy[:,3] - bbox_numpy[:,1])
+
+        bbox_ans = (bbox_numpy[:, 3] - bbox_numpy[:, 1])
         bbox_numpy[:, 3] = Len-1-bbox_numpy[:, 1]
         bbox_numpy[:, 1] = bbox_numpy[:, 3] - bbox_ans
-        # 上下
-        bbox_ans = bbox_numpy[:,2] - bbox_numpy[:,0]
+
+        bbox_ans = bbox_numpy[:, 2] - bbox_numpy[:, 0]
         bbox_numpy[:, 2] = Len-1-bbox_numpy[:, 0]
         bbox_numpy[:, 0] = bbox_numpy[:, 2] - bbox_ans
         return bbox_numpy
     elif Type == 3:
-        bbox_ans = bbox_numpy[:,3] - bbox_numpy[:,1]
+        bbox_ans = bbox_numpy[:, 3] - bbox_numpy[:, 1]
         bbox_numpy[:, 3] = Len-1-bbox_numpy[:, 1]
         bbox_numpy[:, 1] = bbox_numpy[:, 3] - bbox_ans
-        # 转置
+
         bbox_ans = np.zeros_like(bbox_numpy)
         bbox_ans[:, 0] = bbox_numpy[:, 1]
         bbox_ans[:, 1] = bbox_numpy[:, 0]
         return bbox_ans
     elif Type == 4:
-        bbox_ans = bbox_numpy[:,3] - bbox_numpy[:,1]
+        bbox_ans = bbox_numpy[:, 3] - bbox_numpy[:, 1]
         bbox_numpy[:, 3] = Len-1-bbox_numpy[:, 1]
         bbox_numpy[:, 1] = bbox_numpy[:, 3] - bbox_ans
         return bbox_numpy
     elif Type == 5:
-        # 左右
-        bbox_ans = (bbox_numpy[:,3] - bbox_numpy[:,1])
+
+        bbox_ans = (bbox_numpy[:, 3] - bbox_numpy[:, 1])
         bbox_numpy[:, 3] = Len-1-bbox_numpy[:, 1]
         bbox_numpy[:, 1] = bbox_numpy[:, 3] - bbox_ans
-        # 上下
-        bbox_ans = bbox_numpy[:,2] - bbox_numpy[:,0]
+
+        bbox_ans = bbox_numpy[:, 2] - bbox_numpy[:, 0]
         bbox_numpy[:, 2] = Len-1-bbox_numpy[:, 0]
         bbox_numpy[:, 0] = bbox_numpy[:, 2] - bbox_ans
-        # 转置
+
         bbox_ans = np.zeros_like(bbox_numpy)
         bbox_ans[:, 0] = bbox_numpy[:, 1]
         bbox_ans[:, 1] = bbox_numpy[:, 0]
         return bbox_ans
     elif Type == 6:
-        bbox_ans = bbox_numpy[:,2] - bbox_numpy[:,0]
+        bbox_ans = bbox_numpy[:, 2] - bbox_numpy[:, 0]
         bbox_numpy[:, 2] = Len-1-bbox_numpy[:, 0]
         bbox_numpy[:, 0] = bbox_numpy[:, 2] - bbox_ans
         return bbox_numpy
@@ -119,27 +116,29 @@ def bbox_ensemble_back(bbox, Type = 0, Len = 800):
     else:
         raise NotImplementedError("")
 
-def ensemble_for_dim_4(batchdata, Type = 0):
+
+def ensemble_for_dim_4(batchdata, Type=0):
     if Type == 0:
         return batchdata
     elif Type == 1:
-        return np.flip(batchdata.transpose(0,1,3,2), axis=2)  # 逆时针旋转90度
+        return np.flip(batchdata.transpose(0, 1, 3, 2), axis=2)
     elif Type == 2:
-        return np.flip(np.flip(batchdata, axis=2), axis=3)  # 逆时针180
+        return np.flip(np.flip(batchdata, axis=2), axis=3)
     elif Type == 3:
-        return np.flip(batchdata.transpose(0,1,3,2), axis=3)  # 逆时针270
+        return np.flip(batchdata.transpose(0, 1, 3, 2), axis=3)
     elif Type == 4:
-        return np.flip(batchdata, axis = 3)  # 原图左右翻转
+        return np.flip(batchdata, axis=3)
     elif Type == 5:
-        return np.flip(np.flip(batchdata.transpose(0,1,3,2), axis=2), axis= 3)  # 
+        return np.flip(np.flip(batchdata.transpose(0, 1, 3, 2), axis=2), axis=3)
     elif Type == 6:
-        return np.flip(batchdata, axis = 2)  # 原图上下翻转
+        return np.flip(batchdata, axis=2)
     elif Type == 7:
-        return batchdata.transpose(0,1,3,2)  # 原图转置
+        return batchdata.transpose(0, 1, 3, 2)
     else:
         raise NotImplementedError("")
 
-def ensemble_forward(batchdata, Type = 0):
+
+def ensemble_forward(batchdata, Type=0):
     """
         batchdata:  B,C,H,W    numpy     or  B,T,C,H,W
         Type:  0~7
@@ -153,30 +152,31 @@ def ensemble_forward(batchdata, Type = 0):
         L = []
         for i in range(batchdata.shape[1]):
             L.append(ensemble_for_dim_4(batchdata[:, i, ...], Type=Type))
-        return np.stack(L, axis = 1)  # B,T,C,H,W
+        return np.stack(L, axis=1)
 
 
 def ensemble_back_for_dim_4(batchdata, Type):
     if Type == 0:
         return batchdata
     elif Type == 1:
-        return np.flip(batchdata.transpose(0,1,3,2), axis=3)
+        return np.flip(batchdata.transpose(0, 1, 3, 2), axis=3)
     elif Type == 2:
         return np.flip(np.flip(batchdata, axis=2), axis=3)
     elif Type == 3:
-        return np.flip(batchdata.transpose(0,1,3,2), axis=2) 
+        return np.flip(batchdata.transpose(0, 1, 3, 2), axis=2)
     elif Type == 4:
-        return np.flip(batchdata, axis = 3)
+        return np.flip(batchdata, axis=3)
     elif Type == 5:
-        return np.flip(np.flip(batchdata, axis = 3).transpose(0,1,3,2), axis=3)
+        return np.flip(np.flip(batchdata, axis=3).transpose(0, 1, 3, 2), axis=3)
     elif Type == 6:
-        return np.flip(batchdata, axis = 2)
+        return np.flip(batchdata, axis=2)
     elif Type == 7:
-        return batchdata.transpose(0,1,3,2)
+        return batchdata.transpose(0, 1, 3, 2)
     else:
         raise NotImplementedError("")
 
-def ensemble_back(batchdata, Type = 0):
+
+def ensemble_back(batchdata, Type=0):
     """
         batchdata:  B,C,H,W    tensor
         Type: 0~7
@@ -188,17 +188,19 @@ def ensemble_back(batchdata, Type = 0):
     if len(batchdata.shape) == 4:
         return ensemble_back_for_dim_4(batchdata, Type)
     elif len(batchdata.shape) == 5:
-        # raise RuntimeError("ensemble back should for 4 dim not 5 dim usually!")
+
         L = []
         for i in range(batchdata.shape[1]):
             L.append(ensemble_back_for_dim_4(batchdata[:, i, ...], Type=Type))
-        return np.stack(L, axis = 1)  # B,T,C,H,W
+        return np.stack(L, axis=1)
+
 
 def _half(x):
-    if x % 2 ==0:
+    if x % 2 == 0:
         return (x//2, x//2)
     else:
-        return (x//2, x//2 +1)
+        return (x//2, x//2 + 1)
+
 
 def cal_pad_size(l, padding_multi):
     diff = l % padding_multi
@@ -207,7 +209,8 @@ def cal_pad_size(l, padding_multi):
     diff = padding_multi - diff
     return _half(diff)
 
-def img_multi_padding(img, padding_multi = 4, pad_value = 0, pad_method = "reflect"):
+
+def img_multi_padding(img, padding_multi=4, pad_value=0, pad_method="reflect"):
     """
         pad_method: reflect  edge  constant    
     """
@@ -219,16 +222,17 @@ def img_multi_padding(img, padding_multi = 4, pad_value = 0, pad_method = "refle
     origin_W = img.shape[-1]
     pad_H = cal_pad_size(origin_H, padding_multi)
     pad_W = cal_pad_size(origin_W, padding_multi)
-    if dimlen == 5: # [B,N,C,H,W]
-        return np.pad(img, ((0,0), (0,0), (0,0), pad_H, pad_W), mode=pad_method)
+    if dimlen == 5:
+        return np.pad(img, ((0, 0), (0, 0), (0, 0), pad_H, pad_W), mode=pad_method)
     elif dimlen == 4:
-        return np.pad(img, ((0,0), (0,0), pad_H, pad_W), mode=pad_method)
+        return np.pad(img, ((0, 0), (0, 0), pad_H, pad_W), mode=pad_method)
     elif dimlen == 3:
-        return np.pad(img, ((0,0), pad_H, pad_W), mode=pad_method)
+        return np.pad(img, ((0, 0), pad_H, pad_W), mode=pad_method)
     elif dimlen == 2:
         return np.pad(img, (pad_H, pad_W), mode=pad_method)
     else:
         raise NotImplementedError("dimlen: {} not implement".format(dimlen))
+
 
 def img_de_multi_padding(img, origin_H, origin_W):
     """
@@ -243,6 +247,7 @@ def img_de_multi_padding(img, origin_H, origin_W):
         return img[..., pad_H[0]: paded_H - pad_H[1], pad_W[0]: paded_W - pad_W[1]]
     else:
         raise NotImplementedError("dimlen: {} not implement".format(dimlen))
+
 
 def _scale_size(size, scale):
     """Rescale a size by a ratio.
@@ -288,7 +293,8 @@ def imresize(img,
     """
     h, w = img.shape[:2]
     assert interpolation in interp_codes
-    resized_img = cv2.resize(img, size, dst=out, interpolation=interp_codes[interpolation])
+    resized_img = cv2.resize(
+        img, size, dst=out, interpolation=interp_codes[interpolation])
     if not return_scale:
         return resized_img
     else:
@@ -337,7 +343,8 @@ def rescale_size(old_size, scale, return_scale=False):
     elif isinstance(scale, tuple):
         max_long_edge = max(scale)
         max_short_edge = min(scale)
-        scale_factor = min(max_long_edge / max(h, w), max_short_edge / min(h, w))
+        scale_factor = min(max_long_edge / max(h, w),
+                           max_short_edge / min(h, w))
     else:
         raise TypeError(
             f'Scale must be a number or tuple of int, but got {type(scale)}')
@@ -375,7 +382,7 @@ def imrescale(img, scale, return_scale=False, interpolation='area'):
         return rescaled_img
 
 
-def bboxflip_(bbox, direction='horizontal', Len = 400):
+def bboxflip_(bbox, direction='horizontal', Len=400):
     """
         top left  bottom  right
     """
@@ -384,11 +391,12 @@ def bboxflip_(bbox, direction='horizontal', Len = 400):
     if direction == 'horizontal':
         x = bbox[3] - bbox[1]
         bbox[3] = Len-1-bbox[1]
-        bbox[1] = bbox[3] - x 
+        bbox[1] = bbox[3] - x
     else:
         x = bbox[2] - bbox[0]
         bbox[2] = Len-1-bbox[0]
         bbox[0] = bbox[2] - x
+
 
 def imflip_(img, direction='horizontal'):
     """Inplace flip an image horizontally or vertically.
@@ -406,13 +414,15 @@ def imflip_(img, direction='horizontal'):
     else:
         return cv2.flip(img, 0, img)
 
+
 def flowflip_(flow, direction):
     imflip_(flow, direction)
-    # 变负号
+
     if direction == 'horizontal':
-        flow[:,:,1] *= (-1)
+        flow[:, :, 1] *= (-1)
     else:
-        flow[:,:,0] *= (-1)
+        flow[:, :, 0] *= (-1)
+
 
 def imrotate(img,
              angle,
@@ -486,14 +496,14 @@ def imnormalize_(img, mean, std, to_rgb=True):
     Returns:
         ndarray: The normalized image.
     """
-    # cv2 inplace normalization does not accept uint8
+
     assert img.dtype != np.uint8
     mean = np.float64(mean.reshape(1, -1))
     stdinv = 1 / np.float64(std.reshape(1, -1))
     if to_rgb:
-        cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)  # inplace
-    cv2.subtract(img, mean, img)  # inplace
-    cv2.multiply(img, stdinv, img)  # inplace
+        cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)
+    cv2.subtract(img, mean, img)
+    cv2.multiply(img, stdinv, img)
     return img
 
 
@@ -501,10 +511,10 @@ def imdenormalize(img, mean, std, to_bgr=True):
     assert img.dtype != np.uint8
     mean = mean.reshape(1, -1).astype(np.float64)
     std = std.reshape(1, -1).astype(np.float64)
-    img = cv2.multiply(img, std)  # make a copy
-    cv2.add(img, mean, img)  # inplace
+    img = cv2.multiply(img, std)
+    cv2.add(img, mean, img)
     if to_bgr:
-        cv2.cvtColor(img, cv2.COLOR_RGB2BGR, img)  # inplace
+        cv2.cvtColor(img, cv2.COLOR_RGB2BGR, img)
     return img
 
 
@@ -549,33 +559,30 @@ def tensor2img(tensor, out_type=np.uint8, min_max=(0, 1)):
     elif isinstance(tensor, list) and all(is_var(t) for t in tensor):
         tensor = [t.to("cpu0").astype('float32').numpy() for t in tensor]
     else:
-        assert is_ndarray(tensor) or (isinstance(tensor, list) and all(is_ndarray(t) for t in tensor))
+        assert is_ndarray(tensor) or (isinstance(tensor, list)
+                                      and all(is_ndarray(t) for t in tensor))
 
     if is_ndarray(tensor):
         tensor = [tensor]
     result = []
     for _tensor in tensor:
-        # Squeeze two times so that:
-        # 1. (1, 1, h, w) -> (h, w) or
-        # 3. (1, 3, h, w) -> (3, h, w) or
-        # 2. (n>1, 3/1, h, w) -> (n>1, 3/1, h, w)
+
         _tensor = np.squeeze(_tensor)
         _tensor = np.clip(_tensor, a_min=min_max[0], a_max=min_max[1])
         _tensor = (_tensor - min_max[0]) / (min_max[1] - min_max[0])
         n_dim = len(_tensor.shape)
         if n_dim == 4:
             raise NotImplementedError("dose not support mini batch var2image")
-            # img_np = make_grid(_tensor, nrow=int(math.sqrt(_tensor.size(0))), normalize=False).numpy()
-            # img_np = np.transpose(img_np[[2, 1, 0], :, :], (1, 2, 0))
+
         elif n_dim == 3:
-            img_np = np.transpose(_tensor[[2, 1, 0], :, :], (1, 2, 0))  # CHW -> HWC and rgb -> bgr
+            img_np = np.transpose(_tensor[[2, 1, 0], :, :], (1, 2, 0))
         elif n_dim == 2:
             img_np = _tensor
         else:
             raise ValueError('Only support 4D, 3D or 2D tensor. '
                              f'But received with dimension: {n_dim}')
         if out_type == np.uint8:
-            # Unlike MATLAB, numpy.unit8() WILL NOT round by default.
+
             img_np = (img_np * 255.0).round()
         img_np.astype(out_type)
         result.append(img_np)

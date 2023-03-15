@@ -18,7 +18,7 @@ class TextLoggerHook(LoggerHook):
             if less than `interval`.
     """
 
-    def __init__(self, interval = 10, ignore_last = True, by_epoch = False, average_length = 10):
+    def __init__(self, interval=10, ignore_last=True, by_epoch=False, average_length=10):
         super(TextLoggerHook, self).__init__(interval, ignore_last, by_epoch)
         self.pool = AVERAGE_POOL(average_length=average_length)
 
@@ -30,26 +30,25 @@ class TextLoggerHook(LoggerHook):
             log_dict['iter'] = runner.inner_iter
         else:
             log_dict['iter'] = runner.iter
-            
-        # TODO: learning rate 信息
-        # TODO: 内存使用信息(cpu, gpu)
 
         log_items = []
         for name, val in log_dict.items():
             if isinstance(val, Tensor) or is_list_of(val, Tensor):
                 if isinstance(val, list):
-                    val = [ float(item.item()) for item in val ]
+                    val = [float(item.item()) for item in val]
                 else:
                     val = float(val.item())
                 aver_val = self.pool.update(name, val)
-                
+
                 if isinstance(val, list):
-                    val = ", ".join([ "{:.5f}".format(item) for item in val ])
-                    aver_val = ", ".join([ "{:.5f}".format(item) for item in aver_val ])
+                    val = ", ".join(["{:.5f}".format(item) for item in val])
+                    aver_val = ", ".join(["{:.5f}".format(item)
+                                         for item in aver_val])
                 else:
                     val = "{:.5f}".format(val)
                     aver_val = "{:.5f}".format(aver_val)
-                log_items.append("{}: [{}], {}_ma: [{}]".format(name, val, name, aver_val))
+                log_items.append("{}: [{}], {}_ma: [{}]".format(
+                    name, val, name, aver_val))
             else:
                 log_items.append(f'{name}: {val}')
 

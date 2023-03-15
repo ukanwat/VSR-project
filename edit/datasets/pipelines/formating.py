@@ -13,7 +13,8 @@ class ImageToTensor(object):
         to_float32 (bool): Whether convert numpy image array to np.float32
             before converted to tensor. Default: True.
     """
-    def __init__(self, keys, to_float32=True, do_not_stack = False):
+
+    def __init__(self, keys, to_float32=True, do_not_stack=False):
         self.keys = keys
         self.to_float32 = to_float32
         self.do_not_stack = do_not_stack
@@ -28,12 +29,12 @@ class ImageToTensor(object):
             dict: A dict containing the processed data and information.
         """
         for key in self.keys:
-            # deal with gray scale img: expand a color channel
+
             if len(results[key].shape) == 2:
                 results[key] = results[key][..., None]
             if self.to_float32 and not isinstance(results[key], np.float32):
                 results[key] = results[key].astype(np.float32)
-            results[key] = results[key].transpose(2, 0, 1)  # [HWC] -> [CHW]
+            results[key] = results[key].transpose(2, 0, 1)
         return results
 
     def __repr__(self):
@@ -68,7 +69,7 @@ class FramesToTensor(ImageToTensor):
                 raise TypeError(f'results["{key}"] should be a list, '
                                 f'but got {type(results[key])}')
             for idx, v in enumerate(results[key]):
-                # deal with gray scale img: expand a color channel
+
                 if len(v.shape) == 2:
                     v = v[..., None]
                 if self.to_float32 and not isinstance(v, np.float32):
@@ -78,7 +79,7 @@ class FramesToTensor(ImageToTensor):
             if not self.do_not_stack:
                 results[key] = np.stack(results[key], axis=0)
                 if results[key].shape[0] == 1:
-                    results[key] = np.squeeze(results[key], axis=0)  # 如果只有一帧则变成图片
+                    results[key] = np.squeeze(results[key], axis=0)
         return results
 
 

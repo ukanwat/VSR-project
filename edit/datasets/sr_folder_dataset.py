@@ -71,9 +71,7 @@ class SRFolderDataset(BaseSRDataset):
         data_infos = []
         lq_paths = self.scan_folder(self.lq_folder)
         gt_paths = self.scan_folder(self.gt_folder)
-        # assert len(lq_paths) == len(gt_paths), (
-        #     f'gt and lq datasets have different number of images: '
-        #     f'{len(lq_paths)}, {len(gt_paths)}.')
+
         for gt_path in gt_paths:
             basename, ext = osp.splitext(osp.basename(gt_path))
             lq_path = osp.join(self.lq_folder,
@@ -81,5 +79,6 @@ class SRFolderDataset(BaseSRDataset):
                                 f'{ext}'))
             assert lq_path in lq_paths, f'{lq_path} is not in lq_paths.'
             data_infos.append(dict(lq_path=lq_path, gt_path=gt_path))
-        self.logger.info("SRFolder dataset load ok, len:{}".format(len(data_infos)))
+        self.logger.info(
+            "SRFolder dataset load ok, len:{}".format(len(data_infos)))
         return data_infos

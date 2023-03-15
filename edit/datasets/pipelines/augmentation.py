@@ -6,7 +6,7 @@ from edit.utils import imflip_, bboxflip_, img_shelter, flowflip_
 
 @PIPELINES.register_module()
 class Corner_Shelter(object):
-    def __init__(self, keys, shelter_ratio=0.1, black_ratio = 0.75):
+    def __init__(self, keys, shelter_ratio=0.1, black_ratio=0.75):
         self.keys = keys
         self.shelter_ratio = shelter_ratio
         self.black_ratio = black_ratio
@@ -27,6 +27,7 @@ class Corner_Shelter(object):
         repr_str += (
             f'(keys={self.keys}, transpose_ratio={self.transpose_ratio})')
         return repr_str
+
 
 @PIPELINES.register_module()
 class RandomTransposeHW(object):
@@ -70,7 +71,7 @@ class RandomTransposeHW(object):
                             tmp_bbox[0], tmp_bbox[1] = tmp_bbox[1], tmp_bbox[0]
                             tmp_bbox[2], tmp_bbox[3] = tmp_bbox[3], tmp_bbox[2]
                             results[key][idx] = tmp_bbox
-                        # raise NotImplementedError("not imple for key is list for bbox tranposeHW")
+
                     else:
                         tmp_bbox = results[key].copy()
                         tmp_bbox[0], tmp_bbox[1] = tmp_bbox[1], tmp_bbox[0]
@@ -80,12 +81,14 @@ class RandomTransposeHW(object):
                     assert isinstance(results[key], list)
                     tmp = []
                     for item in results[key]:
-                        item1 = item.transpose(1,0,2)
-                        tmp.append(-1 * np.stack([item1[:,:,1], item1[:, :, 0]], axis=2))
+                        item1 = item.transpose(1, 0, 2)
+                        tmp.append(-1 *
+                                   np.stack([item1[:, :, 1], item1[:, :, 0]], axis=2))
                     results[key] = tmp
                 else:
                     if isinstance(results[key], list):
-                        results[key] = [v.transpose(1, 0, 2) for v in results[key]]
+                        results[key] = [v.transpose(1, 0, 2)
+                                        for v in results[key]]
                     else:
                         results[key] = results[key].transpose(1, 0, 2)
 
@@ -153,7 +156,8 @@ class Flip(object):
                     if key in ('bbox', 'bboxes'):
                         bboxflip_(results[key], self.direction, self.Len)
                     elif key in ('flow'):
-                        raise NotImplementedError("not implemented flow for just one frame")
+                        raise NotImplementedError(
+                            "not implemented flow for just one frame")
                     else:
                         imflip_(results[key], self.direction)
 
@@ -189,7 +193,7 @@ class GenerateFrameIndiceswithPadding(object):
                 circle: [3, 4, 0, 1, 2]
     """
 
-    def __init__(self, padding, many2many = False, index_start = 0, name_padding = True, dist_gap = 0):
+    def __init__(self, padding, many2many=False, index_start=0, name_padding=True, dist_gap=0):
         if padding not in ('replicate', 'reflection', 'reflection_circle', 'circle'):
             raise ValueError(f'Wrong padding mode {padding}.'
                              'Should be "replicate", "reflection", '
@@ -210,14 +214,14 @@ class GenerateFrameIndiceswithPadding(object):
         Returns:
             dict: A dict containing the processed data and information.
         """
-        clip_name, frame_name = results['LRkey'].split('/') # 000/0000001.png
+        clip_name, frame_name = results['LRkey'].split('/')
         frame_name, ext_name = osp.splitext(frame_name)
         if self.name_padding:
             padding_length = len(frame_name)
         else:
             padding_length = 0
-        current_idx = int(frame_name) - self.index_start  # start from 0, easy to cal
-        max_frame_num = results['max_frame_num'] - 1  
+        current_idx = int(frame_name) - self.index_start
+        max_frame_num = results['max_frame_num'] - 1
         num_input_frames = results['num_input_frames']
         num_pad = num_input_frames // 2
 
@@ -244,10 +248,9 @@ class GenerateFrameIndiceswithPadding(object):
             else:
                 pad_idx = i
             frame_list.append(pad_idx)
-        
-        # add dist frames
+
         if self.dist_gap > 0:
-            # select one frame every dist_gap frames
+
             ref_index = []
             for i in range(0, max_frame_num+1, self.dist_gap):
                 if not (i in frame_list):
@@ -256,22 +259,24 @@ class GenerateFrameIndiceswithPadding(object):
 
         lq_path_root = results['lq_path']
         lq_paths = [
-            osp.join(lq_path_root, clip_name,  str(idx + self.index_start).zfill(padding_length) + ext_name)
+            osp.join(lq_path_root, clip_name,  str(
+                idx + self.index_start).zfill(padding_length) + ext_name)
             for idx in frame_list
         ]
         results['lq_path'] = lq_paths
-        
-        # for eval 
+
         if 'HRkey' in results.keys():
             clip_name_HR, _ = results['HRkey'].split('/')
             gt_path_root = results['gt_path']
             if self.many2many:
                 gt_paths = [
-                    osp.join(gt_path_root, clip_name_HR, str(idx + self.index_start).zfill(padding_length) + ext_name)
+                    osp.join(gt_path_root, clip_name_HR, str(
+                        idx + self.index_start).zfill(padding_length) + ext_name)
                     for idx in frame_list
                 ]
             else:
-                gt_paths = [osp.join(gt_path_root, clip_name_HR, frame_name + ext_name)]
+                gt_paths = [
+                    osp.join(gt_path_root, clip_name_HR, frame_name + ext_name)]
             results['gt_path'] = gt_paths
         return results
 
@@ -282,19 +287,19 @@ class GenerateFrameIndiceswithPadding(object):
 
 @PIPELINES.register_module()
 class STTN_REDS_GenerateFrameIndices(object):
-    def __init__(self, interval_list, gap = 20):
+    def __init__(self, interval_list, gap=20):
         self.interval_list = interval_list
-        self.gap = gap # 前后的间隔
+        self.gap = gap
 
     def __call__(self, results):
-        clip_name, frame_name = results['LRkey'].split('/')  # key example: 000/00000000.png
-        clip_name_HR, _ = results['HRkey'].split('/')  # key example: 000/00000000.png
-        frame_name, ext_name = osp.splitext(frame_name)  # 00000000    .png
+        clip_name, frame_name = results['LRkey'].split('/')
+        clip_name_HR, _ = results['HRkey'].split('/')
+        frame_name, ext_name = osp.splitext(frame_name)
         padding_length = len(frame_name)
         center_frame_idx = int(frame_name)
         num_half_frames = results['num_input_frames'] // 2
         interval = np.random.choice(self.interval_list)
-        start_frame_idx = center_frame_idx - num_half_frames * interval  # ensure not exceeding the borders
+        start_frame_idx = center_frame_idx - num_half_frames * interval
         end_frame_idx = center_frame_idx + num_half_frames * interval
         start = 0
         end = start + results['max_frame_num']
@@ -307,8 +312,8 @@ class STTN_REDS_GenerateFrameIndices(object):
             range(center_frame_idx - num_half_frames * interval,
                   center_frame_idx + num_half_frames * interval + 1, interval))
 
-        if self.gap >0:
-            # append to neighbor_list two frames (for reds)
+        if self.gap > 0:
+
             now_end = neighbor_list[-1]
             add_end_1 = min(now_end + self.gap, end-1)
             add_end_2 = min(now_end + self.gap*2, end-1)
@@ -317,23 +322,26 @@ class STTN_REDS_GenerateFrameIndices(object):
 
             now_start = neighbor_list[0]
             add_start_1 = max(0, now_start - self.gap)
-            # neighbor_list.insert(0, add_start_1)
+
             neighbor_list.append(add_start_1)
 
         lq_path_root = results['lq_path']
         gt_path_root = results['gt_path']
         lq_paths = [
-            osp.join(lq_path_root, clip_name, str(v).zfill(padding_length) + ext_name)
+            osp.join(lq_path_root, clip_name, str(
+                v).zfill(padding_length) + ext_name)
             for v in neighbor_list
         ]
         gt_paths = [
-            osp.join(gt_path_root, clip_name_HR, str(v).zfill(padding_length) + ext_name)
+            osp.join(gt_path_root, clip_name_HR, str(
+                v).zfill(padding_length) + ext_name)
             for v in neighbor_list
         ]
         results['lq_path'] = lq_paths
         results['gt_path'] = gt_paths
         results['interval'] = interval
         return results
+
 
 @PIPELINES.register_module()
 class GenerateFrameIndices(object):
@@ -345,7 +353,7 @@ class GenerateFrameIndices(object):
         Added or modified keys:  lq_path, gt_path, interval
     """
 
-    def __init__(self, interval_list, many2many = False, index_start = 0, name_padding = True, load_flow = False): # default is REDS dataset
+    def __init__(self, interval_list, many2many=False, index_start=0, name_padding=True, load_flow=False):
         self.interval_list = interval_list
         self.many2many = many2many
         self.index_start = index_start
@@ -363,9 +371,9 @@ class GenerateFrameIndices(object):
         Returns:
             dict: A dict containing the processed data and information.
         """
-        clip_name, frame_name = results['LRkey'].split('/')  # key example: 000/00000000.png
-        clip_name_HR, _ = results['HRkey'].split('/')  # key example: 000/00000000.png
-        frame_name, ext_name = osp.splitext(frame_name)  # 00000000    .png
+        clip_name, frame_name = results['LRkey'].split('/')
+        clip_name_HR, _ = results['HRkey'].split('/')
+        frame_name, ext_name = osp.splitext(frame_name)
         if self.name_padding:
             padding_length = len(frame_name)
         else:
@@ -374,7 +382,7 @@ class GenerateFrameIndices(object):
         num_half_frames = results['num_input_frames'] // 2
 
         interval = np.random.choice(self.interval_list)
-        # ensure not exceeding the borders
+
         start_frame_idx = center_frame_idx - num_half_frames * interval
         end_frame_idx = center_frame_idx + num_half_frames * interval
         start = self.index_start
@@ -391,17 +399,20 @@ class GenerateFrameIndices(object):
         lq_path_root = results['lq_path']
         gt_path_root = results['gt_path']
         lq_paths = [
-            osp.join(lq_path_root, clip_name, str(v).zfill(padding_length) + ext_name)
+            osp.join(lq_path_root, clip_name, str(
+                v).zfill(padding_length) + ext_name)
             for v in neighbor_list
         ]
         if self.many2many:
             gt_paths = [
-                osp.join(gt_path_root, clip_name_HR, str(v).zfill(padding_length) + ext_name)
+                osp.join(gt_path_root, clip_name_HR, str(
+                    v).zfill(padding_length) + ext_name)
                 for v in neighbor_list
             ]
         else:
             frame_name = str(center_frame_idx).zfill(padding_length)
-            gt_paths = [osp.join(gt_path_root, clip_name_HR, frame_name + ext_name)]
+            gt_paths = [
+                osp.join(gt_path_root, clip_name_HR, frame_name + ext_name)]
         results['lq_path'] = lq_paths
         results['gt_path'] = gt_paths
         results['interval'] = interval
@@ -409,14 +420,15 @@ class GenerateFrameIndices(object):
         if self.load_flow:
             flows = []
             flow_paths = [
-                osp.join(self.flow_dir, clip_name, str(v).zfill(padding_length)+"_"+ str(v+1).zfill(padding_length) + ".npy")
+                osp.join(self.flow_dir, clip_name, str(v).zfill(
+                    padding_length)+"_" + str(v+1).zfill(padding_length) + ".npy")
                 for v in neighbor_list[:-1]
             ]
-            # load npy
+
             for flowpath in flow_paths:
                 flows.append(np.load(flowpath))
             results['flow'] = flows
-            
+
         return results
 
     def __repr__(self):

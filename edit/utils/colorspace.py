@@ -145,11 +145,11 @@ def rgb2ycbcr(img, y_only=False):
     This function produces the same results as Matlab's `rgb2ycbcr` function.
     It implements the ITU-R BT.601 conversion for standard-definition
     television. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     It differs from a similar function in cv2.cvtColor: `RGB <-> YCrCb`.
     In OpenCV, it implements a JPEG conversion. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     Args:
         img (ndarray): The input image. It accepts:
@@ -179,11 +179,11 @@ def bgr2ycbcr(img, y_only=False):
     The bgr version of rgb2ycbcr.
     It implements the ITU-R BT.601 conversion for standard-definition
     television. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     It differs from a similar function in cv2.cvtColor: `BGR <-> YCrCb`.
     In OpenCV, it implements a JPEG conversion. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     Args:
         img (ndarray): The input image. It accepts:
@@ -213,11 +213,11 @@ def ycbcr2rgb(img):
     This function produces the same results as Matlab's ycbcr2rgb function.
     It implements the ITU-R BT.601 conversion for standard-definition
     television. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     It differs from a similar function in cv2.cvtColor: `YCrCb <-> RGB`.
     In OpenCV, it implements a JPEG conversion. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     Args:
         img (ndarray): The input image. It accepts:
@@ -234,7 +234,7 @@ def ycbcr2rgb(img):
                               [0, -0.00153632, 0.00791071],
                               [0.00625893, -0.00318811, 0]]) * 255.0 + [
                                   -222.921, 135.576, -276.836
-                              ]
+    ]
     out_img = _convert_output_type_range(out_img, img_type)
     return out_img
 
@@ -245,11 +245,11 @@ def ycbcr2bgr(img):
     The bgr version of ycbcr2rgb.
     It implements the ITU-R BT.601 conversion for standard-definition
     television. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     It differs from a similar function in cv2.cvtColor: `YCrCb <-> BGR`.
     In OpenCV, it implements a JPEG conversion. See more details in
-    https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion.
+    https://en.wikipedia.org/wiki/YCbCr
 
     Args:
         img (ndarray): The input image. It accepts:
@@ -266,7 +266,7 @@ def ycbcr2bgr(img):
                               [0.00791071, -0.00153632, 0],
                               [0, -0.00318811, 0.00625893]]) * 255.0 + [
                                   -276.836, 135.576, -222.921
-                              ]
+    ]
     out_img = _convert_output_type_range(out_img, img_type)
     return out_img
 

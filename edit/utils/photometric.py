@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+
 def adjust_brightness(img, factor=1.):
     """Adjust image brightness.
     This function controls the brightness of an image. An
@@ -18,9 +19,7 @@ def adjust_brightness(img, factor=1.):
         ndarray: The brightened image.
     """
     degenerated = np.zeros_like(img)
-    # Note manually convert the dtype to np.float32, to
-    # achieve as close results as PIL.ImageEnhance.Brightness.
-    # Set beta=1-factor, and gamma=0
+
     brightened_img = cv2.addWeighted(
         img.astype(np.float32), factor, degenerated.astype(np.float32),
         1 - factor, 0)

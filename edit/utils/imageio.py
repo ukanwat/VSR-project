@@ -89,27 +89,23 @@ def _pillow2array(img, flag='color', channel_order='bgr'):
 
     if flag == 'unchanged':
         array = np.array(img)
-        if array.ndim >= 3 and array.shape[2] >= 3:  # color image
-            array[:, :, :3] = array[:, :, (2, 1, 0)]  # RGB to BGR
+        if array.ndim >= 3 and array.shape[2] >= 3:
+            array[:, :, :3] = array[:, :, (2, 1, 0)]
     else:
-        # If the image mode is not 'RGB', convert it to 'RGB' first.
+
         if img.mode != 'RGB':
             if img.mode != 'LA':
-                # Most formats except 'LA' can be directly converted to RGB
+
                 img = img.convert('RGB')
             else:
-                # When the mode is 'LA', the default conversion will fill in
-                #  the canvas with black, which sometimes shadows black objects
-                #  in the foreground.
-                #
-                # Therefore, a random color (124, 117, 104) is used for canvas
+
                 img_rgba = img.convert('RGBA')
                 img = Image.new('RGB', img_rgba.size, (124, 117, 104))
-                img.paste(img_rgba, mask=img_rgba.split()[3])  # 3 is alpha
+                img.paste(img_rgba, mask=img_rgba.split()[3])
         if flag == 'color':
             array = np.array(img)
             if channel_order != 'rgb':
-                array = array[:, :, ::-1]  # RGB to BGR
+                array = array[:, :, ::-1]
         elif flag == 'grayscale':
             img = img.convert('L')
             array = np.array(img)

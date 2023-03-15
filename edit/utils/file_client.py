@@ -111,7 +111,7 @@ class MemcachedBackend(BaseStorageBackend):
         self.client_cfg = client_cfg
         self._client = mc.MemcachedClient.GetInstance(self.server_list_cfg,
                                                       self.client_cfg)
-        # mc.pyvector servers as a point which points to a memory cache
+
         self._mc_buffer = mc.pyvector()
 
     def get(self, filepath):

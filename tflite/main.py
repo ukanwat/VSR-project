@@ -8,12 +8,16 @@ import numpy as np
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='to get tflite')
-    parser.add_argument("-n", default=False, action='store_true', help="enable None input shape")
-    parser.add_argument('--mgepath', default = None, type=str, help='the path to xxx.mge pretrained model')
+    parser.add_argument("-n", default=False,
+                        action='store_true', help="enable None input shape")
+    parser.add_argument('--mgepath', default=None, type=str,
+                        help='the path to xxx.mge pretrained model')
     args = parser.parse_args()
     return args
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -34,19 +38,16 @@ if __name__ == "__main__":
     netG.compute_output_shape(input_shape=input_shape)
 
     netG = load_from_meg(netG, args.mgepath)
-    
-    # inputs1 = np.zeros((10, 18, 32, 30))
-    # netG.predict(inputs1, batch_size = 1, verbose= 1)
+
     print("testing...")
     inputs2 = np.zeros((5, 180, 320, 30))
-    netG.predict(inputs2, batch_size = 1, verbose= 1)
-
+    netG.predict(inputs2, batch_size=1, verbose=1)
 
     print("converting to tflite....")
     converter = tf.lite.TFLiteConverter.from_keras_model(netG)
     converter.experimental_new_converter = True
     tflite_model = converter.convert()
-    
+
     with open(save_path, 'wb') as f:
         f.write(tflite_model)
 

@@ -22,7 +22,8 @@ class EvalIterHook(Hook):
 
     def __init__(self, dataloader, **eval_kwargs):
         if not isinstance(dataloader, DataLoader):
-            raise TypeError('dataloader must be a mge DataLoader, but got {}'.format(type(dataloader)))
+            raise TypeError(
+                'dataloader must be a mge DataLoader, but got {}'.format(type(dataloader)))
         self.dataloader = dataloader
         self.eval_kwargs = eval_kwargs
         self.interval = self.eval_kwargs.pop('interval', 10000)
@@ -32,8 +33,8 @@ class EvalIterHook(Hook):
         self.multi_process = self.eval_kwargs.pop('multi_process', False)
         self.ensemble = self.eval_kwargs.pop('ensemble', False)
         mkdir_or_exist(self.save_path)
-        self.logger = get_logger(name = "EvalIterHook", log_file=self.log_path) # only for rank0
-        
+        self.logger = get_logger(name="EvalIterHook", log_file=self.log_path)
+
         if is_distributed():
             self.local_rank = dist.get_rank()
             self.nranks = dist.get_world_size()
@@ -46,15 +47,17 @@ class EvalIterHook(Hook):
             return
 
         self.logger.info("start to eval for iter: {}".format(runner.iter+1))
-        save_path = os.path.join(self.save_path, "iter_{}".format(runner.iter+1))
+        save_path = os.path.join(
+            self.save_path, "iter_{}".format(runner.iter+1))
         mkdir_or_exist(save_path)
-        results = []  # list of dict
+        results = []
         if self.multi_process:
             assert is_distributed(), "when set multiprocess eval, you should use multi process training"
             raise NotImplementedError("not support multi process for eval now")
-        elif self.local_rank == 0:  # 全部交给rank0来处理
+        elif self.local_rank == 0:
             for data in self.dataloader:
-                outputs = runner.model.test_step(data, save_image=self.save_image, save_path=save_path, ensemble=self.ensemble)
+                outputs = runner.model.test_step(
+                    data, save_image=self.save_image, save_path=save_path, ensemble=self.ensemble)
                 result = runner.model.cal_for_eval(outputs, data)
                 assert isinstance(result, list)
                 results += result
@@ -73,8 +76,10 @@ class EvalIterHook(Hook):
             results (list of dict): Model forward results.
             iter: now iter.
         """
-        save_path = os.path.join(self.save_path, "iter_{}".format(iters))  # save for some information. e.g. SVG for everyframe value in VSR.
+        save_path = os.path.join(self.save_path, "iter_{}".format(iters))
         eval_res = self.dataloader.dataset.evaluate(results, save_path)
-        self.logger.info("*****   eval results for {} iters:   *****".format(iters))
+        self.logger.info(
+            "*****   eval results for {} iters:   *****".format(iters))
         for name, val in eval_res.items():
-            self.logger.info("metric: {}  average_val: {:.4f}".format(name, val))
+            self.logger.info(
+                "metric: {}  average_val: {:.4f}".format(name, val))

@@ -12,10 +12,7 @@ def build(cfg, registry, default_args=None):
     """
     if isinstance(cfg, list):
         raise NotImplementedError("list of cfg does not support now")
-        # modules = [
-        #     build_from_cfg(cfg_, registry, default_args) for cfg_ in cfg
-        # ]
-        # return Sequential(*modules)
+
     else:
         return build_from_cfg(cfg, registry, default_args)
 

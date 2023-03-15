@@ -5,6 +5,7 @@ import megengine.functional as F
 import math
 from . import default_init_weights
 
+
 class ShuffleV2Block(M.Module):
     def __init__(self, inp, oup, mid_channels, *, ksize, stride):
         super().__init__()
@@ -20,15 +21,15 @@ class ShuffleV2Block(M.Module):
         outputs = oup - inp
 
         branch_main = [
-            # pw
+
             M.Conv2d(inp, mid_channels, 1, 1, 0, bias=False),
             M.ReLU(),
-            # dw
+
             M.Conv2d(
                 mid_channels, mid_channels, ksize, stride, pad,
                 groups=mid_channels, bias=False,
             ),
-            # pw-linear
+
             M.Conv2d(mid_channels, outputs, 1, 1, 0, bias=False),
             M.ReLU(),
         ]
@@ -36,10 +37,10 @@ class ShuffleV2Block(M.Module):
 
         if stride == 2:
             branch_proj = [
-                # dw
+
                 M.Conv2d(inp, inp, ksize, stride, pad, groups=inp, bias=False),
                 M.BatchNorm2d(inp),
-                # pw-linear
+
                 M.Conv2d(inp, inp, 1, 1, 0, bias=False),
                 M.BatchNorm2d(inp),
                 M.ReLU(),
@@ -58,11 +59,12 @@ class ShuffleV2Block(M.Module):
             x = old_x
             return F.concat((self.branch_proj(x_proj), self.branch_main(x)), 1)
         else:
-            raise ValueError("use stride 1 or 2, current stride {}".format(self.stride))
+            raise ValueError(
+                "use stride 1 or 2, current stride {}".format(self.stride))
 
     def channel_shuffle(self, x):
         batchsize, num_channels, height, width = x.shape
-        # assert (num_channels % 4 == 0)
+
         x = x.reshape(batchsize * num_channels // 2, 2, height * width)
         x = F.transpose(x, (1, 0, 2))
         x = x.reshape(2, -1, num_channels // 2, height, width)

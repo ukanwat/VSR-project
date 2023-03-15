@@ -8,11 +8,14 @@ from scipy.special import gamma
 from edit.utils import bgr2gray, bgr2ycbcr
 from .metric_utils import gauss_gradient
 
+
 def fid():
     pass
 
+
 def lpips():
     pass
+
 
 def sad(alpha, trimap, pred_alpha):
     if alpha.ndim != 2 or trimap.ndim != 2 or pred_alpha.ndim != 2:
@@ -76,7 +79,7 @@ def gradient_error(alpha, trimap, pred_alpha, sigma=1.4):
                                      sigma).astype(np.float32)
 
     grad_loss = ((alpha_grad - pred_alpha_grad)**2 * (trimap == 128)).sum()
-    # same as SAD, divide by 1000 to reduce the magnitude of the result
+
     return grad_loss / 1000
 
 
@@ -113,17 +116,15 @@ def connectivity(alpha, trimap, pred_alpha, step=0.1):
         pred_alpha_thresh = pred_alpha >= thresh_steps[i]
         intersection = (alpha_thresh & pred_alpha_thresh).astype(np.uint8)
 
-        # connected components
         _, output, stats, _ = cv2.connectedComponentsWithStats(
             intersection, connectivity=4)
-        # start from 1 in dim 0 to exclude background
+
         size = stats[1:, -1]
 
-        # largest connected component of the intersection
         omega = np.zeros_like(alpha)
         if len(size) != 0:
             max_id = np.argmax(size)
-            # plus one to include background
+
             omega[output == max_id + 1] = 1
 
         mask = (round_down_map == -1) & (omega == 0)
@@ -132,13 +133,13 @@ def connectivity(alpha, trimap, pred_alpha, step=0.1):
 
     alpha_diff = alpha - round_down_map
     pred_alpha_diff = pred_alpha - round_down_map
-    # only calculate difference larger than or equal to 0.15
+
     alpha_phi = 1 - alpha_diff * (alpha_diff >= 0.15)
     pred_alpha_phi = 1 - pred_alpha_diff * (pred_alpha_diff >= 0.15)
 
     connectivity_error = np.sum(
         np.abs(alpha_phi - pred_alpha_phi) * (trimap == 128))
-    # same as SAD, divide by 1000 to reduce the magnitude of the result
+
     return connectivity_error / 1000
 
 
@@ -296,7 +297,7 @@ def estimate_aggd_param(block):
             distribution (Estimating the parames in Equation 7 in the paper).
     """
     block = block.flatten()
-    gam = np.arange(0.2, 10.001, 0.001)  # len = 9801
+    gam = np.arange(0.2, 10.001, 0.001)
     gam_reciprocal = np.reciprocal(gam)
     r_gam = np.square(gamma(gam_reciprocal * 2)) / (
         gamma(gam_reciprocal) * gamma(gam_reciprocal * 3))
@@ -328,10 +329,6 @@ def compute_feature(block):
     alpha, beta_l, beta_r = estimate_aggd_param(block)
     feat.extend([alpha, (beta_l + beta_r) / 2])
 
-    # distortions disturb the fairly regular structure of natural images.
-    # This deviation can be captured by analyzing the sample distribution of
-    # the products of pairs of adjacent coefficients computed along
-    # horizontal, vertical and diagonal orientations.
     shifts = [[0, 1], [1, 0], [1, 1], [1, -1]]
     for i in range(len(shifts)):
         shifted_block = np.roll(block, shifts[i], axis=(0, 1))
@@ -375,26 +372,26 @@ def niqe_core(img,
         block_size_w (int): Width of the blocks in to which image is divided.
             Default: 96 (the official recommended value).
     """
-    # crop image
+
     h, w = img.shape
     num_block_h = math.floor(h / block_size_h)
     num_block_w = math.floor(w / block_size_w)
     img = img[0:num_block_h * block_size_h, 0:num_block_w * block_size_w]
 
-    distparam = []  # dist param is actually the multiscale features.
-    for scale in (1, 2):  # perform on two scales (1, 2)
+    distparam = []
+    for scale in (1, 2):
         mu = convolve(img, gaussian_window, mode='nearest')
         sigma = np.sqrt(
             np.abs(
                 convolve(np.square(img), gaussian_window, mode='nearest') -
                 np.square(mu)))
-        # normalize, as in Eq. 1 in the paper
+
         img_nomalized = (img - mu) / (sigma + 1)
 
         feat = []
         for idx_w in range(num_block_w):
             for idx_h in range(num_block_h):
-                # process ecah block
+
                 block = img_nomalized[idx_h * block_size_h //
                                       scale:(idx_h + 1) * block_size_h //
                                       scale, idx_w * block_size_w //
@@ -403,9 +400,7 @@ def niqe_core(img,
                 feat.append(compute_feature(block))
 
         distparam.append(np.array(feat))
-        # matlab bicubic downsample with anti-aliasing
-        # for simplicity, now we use opencv instead, which will result in
-        # a slight difference.
+
         if scale == 1:
             h, w = img.shape
             img = cv2.resize(
@@ -414,11 +409,9 @@ def niqe_core(img,
 
     distparam = np.concatenate(distparam, axis=1)
 
-    # fit a MVG (multivariate Gaussian) model to distorted patch features
     mu_distparam = np.nanmean(distparam, axis=0)
-    cov_distparam = np.cov(distparam, rowvar=False)  # TODO: use nancov
+    cov_distparam = np.cov(distparam, rowvar=False)
 
-    # compute niqe quality, Eq. 10 in the paper
     invcov_param = np.linalg.pinv((cov_pris_param + cov_distparam) / 2)
     quality = np.matmul(
         np.matmul((mu_pris_param - mu_distparam), invcov_param),
@@ -455,7 +448,6 @@ def niqe(img, crop_border, input_order='HWC', convert_to='y'):
         float: NIQE result.
     """
 
-    # we use the official params estimated from the pristine dataset.
     niqe_pris_params = np.load('mmedit/core/evaluation/niqe_pris_params.npz')
     mu_pris_param = niqe_pris_params['mu_pris_param']
     cov_pris_param = niqe_pris_params['cov_pris_param']

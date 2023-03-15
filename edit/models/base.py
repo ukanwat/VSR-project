@@ -25,7 +25,7 @@ class BaseModel(M.Module):
 
     def forward(self, *inputs, **kwargs):
         pass
-    
+
     @abstractmethod
     def init_weights(self):
         """Abstract method for initializing weight.
@@ -56,10 +56,11 @@ class BaseModel(M.Module):
 
     def create_gradmanager_and_optimizers(self, optimizers_cfg):
         """build gradmanager and optimizers use optimizers_cfg"""
-        # check
+
         for _, cfg in optimizers_cfg.items():
             if not isinstance(cfg, dict):
-                raise RuntimeError("please use 'dict of dict' style for optimizers config (used in grad manager too)")
-        
+                raise RuntimeError(
+                    "please use 'dict of dict' style for optimizers config (used in grad manager too)")
+
         self.gms = build_gradmanagers(self, optimizers_cfg)
         self.optimizers = build_optimizers(self, optimizers_cfg)
