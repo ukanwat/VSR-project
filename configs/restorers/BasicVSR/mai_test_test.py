@@ -1,4 +1,4 @@
-dataroot = "/kaggle/input/redsds/match"
+dataroot = "/kaggle/input/redsds/match/match"
 
 load_path = './ckpt/epoch_62'
 exp_name = 'mai_test_for_test'
